@@ -16,22 +16,14 @@ const root = ReactDOM.createRoot(node);
 
 /* Import plugins */
 
-import entrypoint from '/plugins/entrypoint/client';
-import authentication from '/plugins/authentication/client';
+import Entrypoint from '/plugins/entrypoint/client';
+import Dashboard from '/plugins/thread-core/client';
 
-/* Combine them */
-
-const App = () => {
-  const [$routes, router] = entrypoint();
-  // const [$authentication] = authentication(router);
-  // const [$auth, ...auth] = useAuth(router);
-  // const [$pass] = usePassword(auth, router);
-
-  // We should list them in a reverse order
-  return (<>{$routes}</>);
-};
+/* Render plugins */
 
 root.render(
-  <App />
+  <>
+    <Entrypoint />
+    <Dashboard />
+  </>
 );
-

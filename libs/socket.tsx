@@ -1,33 +1,34 @@
 import React from 'react';
 
-export const usePortal = () => {
-  const ref = React.useRef() as any;
-  const [wtf, setWtf] = React.useState(null as any);
+import { EventEmitter } from '/libs/events';
+import { useBetween } from 'use-between';
 
-  React.useEffect(() => {
-    setWtf(ref.current);
-  }, []);
+const ees = new Map<string, EventEmitter<any>>();
 
-  return [wtf, ref];;
+const ee = (name: string) => {
+  if (!ees.has(name)) {
+    ees.set(name, new EventEmitter());
+  }
+
+  return ees.get(name) as any;
 };
 
-export const useSocket = () => {
-  let content = {};
-
-  return [{
-    add: (name, c) => content[name] = c,
-    content: content,
-  }];
+const useForceUpdate = () => {
+  const [bool, setBool] = React.useState(0);
+  return [React.useCallback(() => setBool((b) => (b + 1) % 20), [setBool]), bool] as const;
 };
 
-const standardWrapper = (wtf) => wtf;
+export const _useEventEmitter = () => {
+  const [forceUpdate, ticker] = useForceUpdate();
 
-export const Socket = ({ wrapper = standardWrapper, socket }) => {
-  return wrapper(Object.values(socket.content));
+  return React.useMemo(() => ({
+    on: <T,>(name: string, listener: (data: T) => any) => { ee(name).on(listener); forceUpdate(); return () => { ee(name).off(listener); forceUpdate(); }; },
+
+    emitsa: <T,>(name: string, data: T) => ee(name).emitsa(data),
+    emitss: <T,>(name: string, data: T) => ee(name).emitss(data),
+    emitpa: <T,>(name: string, data: T) => ee(name).emitpa(data),
+    emitps: <T,>(name: string, data: T) => ee(name).emitps(data),
+  }), [forceUpdate, ticker]);
 };
 
-export const Extension = ({ name, children, socket }: any) => {
-  socket.add(name, children);
-
-  return null;
-};
+export const useEventEmitter = () => useBetween(_useEventEmitter);

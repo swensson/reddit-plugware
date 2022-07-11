@@ -1,19 +1,21 @@
 import React from 'react';
-import { Socket, useSocket } from '/libs/socket';
+// import { Socket, useSocket } from '/libs/socket';
+// import { useBetween } from 'use-between';
 import { BrowserRouter, Routes } from 'react-router-dom';
 
-export default () => {
-  const [socket] = useSocket();
+import { useEventEmitter } from '/libs/socket';
 
-  return [(
-    <Socket socket={socket} wrapper={(data) => (
-      <div key="router">
-        <BrowserRouter>
-          <Routes>
-            {data}
-          </Routes>
-        </BrowserRouter>
-      </div>
-    )}  />
-  ), socket];
+// export const useRouterSocket = () => useBetween(useNewSocket);
+
+export default () => {
+  const socket = useEventEmitter();
+  const content = socket.emitps('router');
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {content}
+      </Routes>
+    </BrowserRouter>
+  )
 };
